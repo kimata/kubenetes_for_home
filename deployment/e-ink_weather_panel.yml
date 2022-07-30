@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: e-ink-weather-panel-deployment
+  labels:
+    app: e-ink-weather-panel
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: e-ink-weather-panel
+  template:
+    metadata:
+      labels:
+        app: e-ink-weather-panel
+    spec:
+      containers:
+      - name: e-ink-weather-panel
+        image: registry.green-rabbit.net/library/e-ink_weather_panel:latest
+        env:
+        - name: RASP_HOSTNAME
+          value: rasp-meter-1
+      dnsPolicy: Default
+      nodeSelector:
+        node-role.kubernetes.io/server: server
