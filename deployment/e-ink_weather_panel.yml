@@ -1,7 +1,15 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: panel
+  labels:
+    name: panel
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: e-ink-weather-panel-deployment
+  namespace: panel
   labels:
     app: e-ink-weather-panel
 spec:
@@ -17,9 +25,24 @@ spec:
       containers:
       - name: e-ink-weather-panel
         image: registry.green-rabbit.net/library/e-ink_weather_panel:latest
+        imagePullPolicy: Always
         env:
         - name: RASP_HOSTNAME
           value: rasp-meter-1
+        resources:
+          requests:
+            memory: 24Mi
+          limits:
+            memory: 32Mi
+        livenessProbe:
+          exec:
+            command:
+              - /opt/weather_panel/src/healthz.py
+          initialDelaySeconds: 120
+          periodSeconds: 60
+          timeoutSeconds: 1
+          successThreshold: 1
+          failureThreshold: 1
       dnsPolicy: Default
       nodeSelector:
         node-role.kubernetes.io/server: server
