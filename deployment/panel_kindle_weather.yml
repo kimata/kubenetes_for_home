@@ -31,9 +31,9 @@ spec:
           value: 192.168.0.101
         resources:
           requests:
-            memory: 32Mi
+            memory: 128Mi
           limits:
-            memory: 64Mi
+            memory: 256Mi
         livenessProbe:
           exec:
             command:
