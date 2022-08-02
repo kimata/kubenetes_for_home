@@ -1,0 +1,48 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: panel
+  labels:
+    name: panel
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kindle-sensor-panel-deployment
+  namespace: panel
+  labels:
+    app: kindle-sensor-panel
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kindle-sensor-panel
+  template:
+    metadata:
+      labels:
+        app: kindle-sensor-panel
+    spec:
+      containers:
+      - name: kindle-sensor-panel
+        image: registry.green-rabbit.net/library/kindle_sensor_panel:latest
+        imagePullPolicy: Always
+        env:
+        - name: KINDLE_HOSTNAME
+          value: 192.168.0.101
+        resources:
+          requests:
+            memory: 128Mi
+          limits:
+            memory: 256Mi
+        livenessProbe:
+          exec:
+            command:
+              - /opt/sensor_panel/src/healthz.py
+          initialDelaySeconds: 120
+          periodSeconds: 60
+          timeoutSeconds: 1
+          successThreshold: 1
+          failureThreshold: 3
+      dnsPolicy: Default
+      nodeSelector:
+        node-role.kubernetes.io/server: server
