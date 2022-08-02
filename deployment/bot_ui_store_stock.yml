@@ -1,0 +1,87 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: bot
+  labels:
+    name: bot
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: pv-bot-ui-store-stock
+  namespace: bot
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 1Gi
+  accessModes:
+  - ReadWriteOnce
+  local:
+    path: /home/kimata/github/ui_store_checker/data
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - tanzania
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-bot-ui-store-stock
+  namespace: bot
+spec:
+  storageClassName: manual
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bot-ui-store-stock-deployment
+  namespace: bot
+  labels:
+    app: bot-ui-store-stock
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bot-ui-store-stock
+  template:
+    metadata:
+      labels:
+        app: bot-ui-store-stock
+    spec:
+      containers:
+      - name: bot-ui-store-stock
+        image: registry.green-rabbit.net/library/bot_ui_store_stock:latest
+        imagePullPolicy: Always
+        volumeMounts:
+        - mountPath: /opt/store_checker/data
+          name: data
+        resources:
+          requests:
+            memory: 256Mi
+          limits:
+            memory: 512Mi
+        livenessProbe:
+          exec:
+            command:
+              - /opt/store_checker/src/healthz.py
+          initialDelaySeconds: 180
+          periodSeconds: 60
+          timeoutSeconds: 1
+          successThreshold: 1
+          failureThreshold: 3
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: pvc-bot-ui-store-stock
+      dnsPolicy: Default
+      nodeSelector:
+        kubernetes.io/hostname: tanzania

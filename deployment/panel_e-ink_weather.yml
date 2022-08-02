@@ -8,32 +8,32 @@ metadata:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: kindle-weather-panel-deployment
+  name: e-ink-weather-panel-deployment
   namespace: panel
   labels:
-    app: kindle-weather-panel
+    app: e-ink-weather-panel
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: kindle-weather-panel
+      app: e-ink-weather-panel
   template:
     metadata:
       labels:
-        app: kindle-weather-panel
+        app: e-ink-weather-panel
     spec:
       containers:
-      - name: kindle-weather-panel
-        image: registry.green-rabbit.net/library/kindle_weather_panel:latest
+      - name: e-ink-weather-panel
+        image: registry.green-rabbit.net/library/e-ink_weather_panel:latest
         imagePullPolicy: Always
         env:
-        - name: KINDLE_HOSTNAME
-          value: 192.168.0.101
+        - name: RASP_HOSTNAME
+          value: rasp-meter-1
         resources:
           requests:
-            memory: 32Mi
+            memory: 128Mi
           limits:
-            memory: 64Mi
+            memory: 256Mi
         livenessProbe:
           exec:
             command:
@@ -42,7 +42,7 @@ spec:
           periodSeconds: 60
           timeoutSeconds: 1
           successThreshold: 1
-          failureThreshold: 1
+          failureThreshold: 3
       dnsPolicy: Default
       nodeSelector:
         node-role.kubernetes.io/server: server
