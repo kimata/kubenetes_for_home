@@ -48,7 +48,9 @@ metadata:
   labels:
     app: bot-mercari-inventory-control
 spec:
-  schedule: "0 18 * * *"
+  # NOTE: kubeadm でセットアップした場合，基本的にタイムゾーンは UTC となるの注意
+  # https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/
+  schedule: "0 9 * * *"
   successfulJobsHistoryLimit: 1
   failedJobsHistoryLimit: 1
   jobTemplate:
