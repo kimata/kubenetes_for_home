@@ -28,7 +28,7 @@ spec:
         imagePullPolicy: Always
         env:
         - name: KINDLE_HOSTNAME
-          value: 192.168.0.101
+          value: 192.168.0.102
         resources:
           requests:
             memory: 128Mi
