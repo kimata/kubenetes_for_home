@@ -1,0 +1,45 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: hems
+  labels:
+    name: hems
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hems-router-fan-deployment
+  namespace: hems
+  labels:
+    app: hems-router-fan
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hems-router-fan
+  template:
+    metadata:
+      labels:
+        app: hems-router-fan
+    spec:
+      containers:
+      - name: hems-router-fan
+        image: registry.green-rabbit.net/library/hems_router_fan:latest
+        imagePullPolicy: Always
+        resources:
+          requests:
+            memory: 128Mi
+          limits:
+            memory: 256Mi
+        livenessProbe:
+          exec:
+            command:
+              - /opt/yamaha_usb_ctrl/src/healthz.py
+          initialDelaySeconds: 120
+          periodSeconds: 60
+          timeoutSeconds: 1
+          successThreshold: 1
+          failureThreshold: 3
+      dnsPolicy: Default
+      nodeSelector:
+        node-role.kubernetes.io/server: server
