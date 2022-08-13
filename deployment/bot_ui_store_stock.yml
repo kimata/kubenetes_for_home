@@ -36,22 +36,22 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: bot-ui-store-stock-deployment
+  name: ui-store-stock-deployment
   namespace: bot
   labels:
-    app: bot-ui-store-stock
+    app: ui-store-stock
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: bot-ui-store-stock
+      app: ui-store-stock
   template:
     metadata:
       labels:
-        app: bot-ui-store-stock
+        app: ui-store-stock
     spec:
       containers:
-      - name: bot-ui-store-stock
+      - name: ui-store-stock
         image: registry.green-rabbit.net/library/bot_ui_store_stock:latest
         imagePullPolicy: Always
         volumeMounts:
