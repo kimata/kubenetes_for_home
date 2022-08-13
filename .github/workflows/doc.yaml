@@ -1,0 +1,59 @@
+name: Doc
+on:
+  push:
+
+jobs:
+  convert_via_pandoc:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: docker://pandoc/core:2.9
+        with:
+          args: >-
+            -s
+            --toc
+            --metadata title="自宅サーバー構成"
+            --template=./tmpl/elegant_bootstrap_menu.html
+            --output=doc/readme.htm
+            doc/readme.htm
+# jobs:
+#   ci:
+#     runs-on: ubuntu-latest
+
+#     strategy:
+#       matrix:
+#         node-version: [14.x]
+
+#     steps:
+#       - uses: docker://pandoc/core:2.9
+
+
+#       - name: Use Node.js ${{ matrix.node-version }}
+#         uses: actions/setup-node@v3
+#         with:
+#           node-version: ${{ matrix.node-version }}
+
+#       - name: Cache node modules
+#         id: cache-nodemodules
+#         uses: actions/cache@v3
+#         env:
+#           cache-name: cache-node-modules
+#         with:
+#           path: node_modules
+#           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+#           restore-keys: |
+#             ${{ runner.os }}-build-${{ env.cache-name }}-
+#             ${{ runner.os }}-build-
+#             ${{ runner.os }}-
+#       - name: Install Dependencies
+#         if: steps.cache-nodemodules.outputs.cache-hit != 'true'
+#         run: |
+#           npm ci
+#       - name: Build
+#         run: |
+#           npm run build 
+#       - name: Cypress E2E test
+#         uses: cypress-io/github-action@v4
+#         with:
+#           start: npm run serve
+#           wait-on: http://localhost:8080/rasp-shutter
+#           browser: chrome
