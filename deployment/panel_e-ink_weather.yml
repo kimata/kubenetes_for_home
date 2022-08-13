@@ -22,6 +22,11 @@ spec:
         env:
         - name: RASP_HOSTNAME
           value: rasp-meter-1
+        - name: INFLUXDB_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: influxdb-token
+              key: password
         resources:
           requests:
             memory: 128Mi
