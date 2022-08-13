@@ -19,3 +19,10 @@ metadata:
   labels:
     name: bot
 ---
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: hems
+  labels:
+    name: hems
+---

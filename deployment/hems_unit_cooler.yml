@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: unit-cooler
+  namespace: hems
+  labels:
+    app: unit-cooler
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: unit-cooler
+  template:
+    metadata:
+      labels:
+        app: unit-cooler
+    spec:
+      containers:
+      - name: unit-cooler
+        image: registry.green-rabbit.net/library/unit_cooler:latest
+        imagePullPolicy: Always
+        env:
+        - name: NODE_HOSTNAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        livenessProbe:
+          exec:
+            command:
+              - /opt/unit_cooler/src/healthz.py
+          initialDelaySeconds: 120
+          periodSeconds: 60
+          timeoutSeconds: 1
+          successThreshold: 1
+          failureThreshold: 3
+        securityContext:
+          privileged: true
+      dnsPolicy: Default
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                - key: hems
+                  operator: In
+                  values:
+                  - unit_cooler
