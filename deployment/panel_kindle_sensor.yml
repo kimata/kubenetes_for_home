@@ -44,5 +44,13 @@ spec:
           successThreshold: 1
           failureThreshold: 3
       dnsPolicy: Default
-      nodeSelector:
-        node-role.kubernetes.io/server: server
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: server
+                    operator: In
+                    values:
+                      - large
+
