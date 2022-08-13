@@ -40,14 +40,14 @@ spec:
           periodSeconds: 60
           timeoutSeconds: 1
           successThreshold: 1
-          failureThreshold: 3
+          failureThreshold: 5
       dnsPolicy: Default
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
               - matchExpressions:
-                  - key: server
+                  - key: node-role.kubernetes.io/server
                     operator: In
                     values:
                       - large
