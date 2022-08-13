@@ -14,7 +14,7 @@ jobs:
             --data-dir=./doc/
             --metadata title="自宅サーバー構成"
             --output=doc/readme.htm
-            doc/readme.htm
+            doc/readme.md
 # jobs:
 #   ci:
 #     runs-on: ubuntu-latest
