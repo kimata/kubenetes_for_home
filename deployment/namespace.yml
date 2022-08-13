@@ -1,0 +1,21 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: panel
+  labels:
+    name: panel
+---
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: bot
+  labels:
+    name: bot
+---
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: bot
+  labels:
+    name: bot
+---
