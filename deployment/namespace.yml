@@ -15,14 +15,14 @@ metadata:
 kind: Namespace
 apiVersion: v1
 metadata:
-  name: bot
+  name: hems
   labels:
-    name: bot
+    name: hems
 ---
 kind: Namespace
 apiVersion: v1
 metadata:
-  name: hems
+  name: sensor
   labels:
-    name: hems
+    name: sensor
 ---
