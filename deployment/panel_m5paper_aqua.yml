@@ -30,15 +30,15 @@ spec:
             memory: 128Mi
           limits:
             memory: 256Mi
-        # livenessProbe:
-        #   exec:
-        #     command:
-        #       - /opt/weather_panel/src/healthz.py
-        #   initialDelaySeconds: 120
-        #   periodSeconds: 60
-        #   timeoutSeconds: 1
-        #   successThreshold: 1
-        #   failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            port: 5000
+            path: /
+          initialDelaySeconds: 120
+          periodSeconds: 60
+          timeoutSeconds: 1
+          successThreshold: 1
+          failureThreshold: 3
       dnsPolicy: Default
       affinity:
         nodeAffinity:
