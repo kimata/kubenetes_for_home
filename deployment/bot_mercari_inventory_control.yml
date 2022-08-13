@@ -43,10 +43,10 @@ spec:
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: bot-mercari-inventory-control-deployment
+  name: mercari-inventory-control-deployment
   namespace: bot
   labels:
-    app: bot-mercari-inventory-control
+    app: mercari-inventory-control
 spec:
   # NOTE: kubeadm でセットアップした場合，基本的にタイムゾーンは UTC となるの注意
   # https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/
@@ -58,7 +58,7 @@ spec:
       template:
         spec:
           containers:
-          - name: bot-mercari-inventory-control
+          - name: mercari-inventory-control
             image: registry.green-rabbit.net/library/bot_mercari_inventory_control:latest
             imagePullPolicy: Always
             volumeMounts:
