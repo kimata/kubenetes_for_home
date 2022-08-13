@@ -30,13 +30,22 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+      - uses: docker://pandoc/core:2.9
+        with:
+          args: >-
+            -s
+            --toc
+            --data-dir=./doc/
+            --metadata title="自宅サーバー構成"
+            --output=doc/readme.htm
+            doc/readme.md
       - name: Setup Pages
         uses: actions/configure-pages@v1
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
         with:
           # Upload entire repository
-          path: '.'
+          path: './doc'
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@main
