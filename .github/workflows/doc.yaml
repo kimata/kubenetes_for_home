@@ -11,8 +11,8 @@ jobs:
           args: >-
             -s
             --toc
+            --data-dir=./doc/
             --metadata title="自宅サーバー構成"
-            --template=./doc/tmpl/elegant_bootstrap_menu.html
             --output=doc/readme.htm
             doc/readme.htm
 # jobs:
