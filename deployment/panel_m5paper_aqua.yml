@@ -19,6 +19,8 @@ spec:
       - name: m5paper-aqua-panel
         image: registry.green-rabbit.net/library/m5paper_aqua_panel:latest
         imagePullPolicy: Always
+        ports:
+        - containerPort: 5555
         env:
         - name: INFLUXDB_TOKEN
           valueFrom:
@@ -32,11 +34,11 @@ spec:
             memory: 256Mi
         livenessProbe:
           httpGet:
-            port: 5000
-            path: /
+            port: 5555
+            path: /aqua-monitor/
           initialDelaySeconds: 120
-          periodSeconds: 60
-          timeoutSeconds: 1
+          periodSeconds: 120
+          timeoutSeconds: 30
           successThreshold: 1
           failureThreshold: 3
       dnsPolicy: Default
