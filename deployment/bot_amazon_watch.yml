@@ -1,0 +1,87 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: bot
+  labels:
+    name: bot
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: pv-bot-amazon-watch
+  namespace: bot
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 1Gi
+  accessModes:
+  - ReadWriteOnce
+  local:
+    path: /home/kimata/prog/amazon_bot/data
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - tanzania
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-bot-amazon-watch
+  namespace: bot
+spec:
+  storageClassName: manual
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: amazon-watch-deployment
+  namespace: bot
+  labels:
+    app: amazon-watch
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: amazon-watch
+  template:
+    metadata:
+      labels:
+        app: amazon-watch
+    spec:
+      containers:
+      - name: amazon-watch
+        image: registry.green-rabbit.net/library/bot_amazon_watch:latest
+        imagePullPolicy: Always
+        volumeMounts:
+        - mountPath: /opt/amazon_bot/data
+          name: data
+        resources:
+          requests:
+            memory: 512Mi
+          limits:
+            memory: 1Gi
+        livenessProbe:
+          exec:
+            command:
+              - /opt/amazon_bot/src/healthz.py
+          initialDelaySeconds: 120
+          periodSeconds: 60
+          timeoutSeconds: 1
+          successThreshold: 1
+          failureThreshold: 3
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: pvc-bot-amazon-watch
+      dnsPolicy: Default
+      nodeSelector:
+        kubernetes.io/hostname: tanzania
