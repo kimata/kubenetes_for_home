@@ -20,7 +20,7 @@ data:
           max_period: 10m
           max_retries: 100
           min_period: 500ms
-        batchsize: 10485760
+        batchsize: 1048576
         batchwait: 15s
         timeout: 5s
 
