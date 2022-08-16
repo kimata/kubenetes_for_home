@@ -46,7 +46,7 @@ spec:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
               - matchExpressions:
-                  - key: server
+                  - key: node-role.kubernetes.io/server
                     operator: In
                     values:
                       - large
