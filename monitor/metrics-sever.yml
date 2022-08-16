@@ -175,13 +175,20 @@ spec:
         volumeMounts:
         - mountPath: /tmp
           name: tmp-dir
-      nodeSelector:
-        kubernetes.io/os: linux
       priorityClassName: system-cluster-critical
       serviceAccountName: metrics-server
       volumes:
       - emptyDir: {}
         name: tmp-dir
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                - key: node-role.kubernetes.io/server
+                  operator: In
+                  values:
+                  - large
 ---
 apiVersion: apiregistration.k8s.io/v1
 kind: APIService

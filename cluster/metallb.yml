@@ -1635,6 +1635,16 @@ spec:
         secret:
           defaultMode: 420
           secretName: webhook-server-cert
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                - key: node-role.kubernetes.io/server
+                  operator: In
+                  values:
+                  - large
+
 ---
 apiVersion: apps/v1
 kind: DaemonSet
