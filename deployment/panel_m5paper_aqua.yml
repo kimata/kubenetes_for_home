@@ -44,9 +44,9 @@ spec:
               key: password
         resources:
           requests:
-            memory: 128Mi
-          limits:
             memory: 256Mi
+          limits:
+            memory: 512Mi
         livenessProbe:
           httpGet:
             port: 5555
@@ -66,4 +66,3 @@ spec:
                     operator: In
                     values:
                       - large
-
