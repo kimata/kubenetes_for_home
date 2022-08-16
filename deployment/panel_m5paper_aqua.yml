@@ -1,3 +1,18 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: m5paper-aqua-panel
+  namespace: panel
+  annotations:
+    metallb.universe.tf/address-pool: default
+spec:
+  selector:
+    app: m5paper-aqua-panel
+  ports:
+  - port: 5555
+    targetPort: 5555
+  type: LoadBalancer
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
