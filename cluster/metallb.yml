@@ -1,5 +1,6 @@
 # MEMO:
 # fetched from https://raw.githubusercontent.com/metallb/metallb/v0.13.4/config/manifests/metallb-native.yaml
+# date: 2020/8/15
 apiVersion: v1
 kind: Namespace
 metadata:
