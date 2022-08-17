@@ -1,0 +1,99 @@
+# NOTE:
+# ホスト名 database のサーバー上に /data/influxdb ディレクトリがあることを想定
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: influxdb
+  namespace: server
+  annotations:
+    metallb.universe.tf/address-pool: default
+spec:
+  selector:
+    app: influxdb
+  ports:
+  - port: 8086
+    targetPort: 8086
+  type: LoadBalancer
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: pv-influxdb
+  namespace: server
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 16Gi
+  accessModes:
+  - ReadWriteOnce
+  local:
+    path: /data/influxdb
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - database
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-influxdb
+  namespace: server
+spec:
+  storageClassName: manual
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 16Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: influxdb
+  namespace: server
+  labels:
+    app: influxdb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: influxdb
+  template:
+    metadata:
+      labels:
+        app: influxdb
+    spec:
+      containers:
+      - name: influxdb
+        image: influxdb:2.3-alpine
+        volumeMounts:
+        - mountPath: /var/lib/influxdb2
+          name: data
+        ports:
+        - containerPort: 8086
+        resources:
+          requests:
+            memory: 128Mi
+          limits:
+            memory: 512Mi
+        livenessProbe:
+          httpGet:
+            port: 8086
+            path: /
+          initialDelaySeconds: 120
+          periodSeconds: 60
+          timeoutSeconds: 30
+          successThreshold: 1
+          failureThreshold: 3
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: pvc-influxdb
+      dnsPolicy: Default
+      nodeSelector:
+        kubernetes.io/hostname: database

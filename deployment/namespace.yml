@@ -26,3 +26,10 @@ metadata:
   labels:
     name: sensor
 ---
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: server
+  labels:
+    name: server
+---
