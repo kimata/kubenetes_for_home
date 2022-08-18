@@ -72,19 +72,6 @@ data:
         regex: (.*):10250
         replacement: ${1}:9100
         target_label: __address__
-    # scrape_configs:
-    #   - job_name: 'prometheus'
-    #     scrape_interval: 5s
-    #     scrape_timeout: 5s
-    #     static_configs:
-    #       - targets: ['localhost:9090']
-    #   - job_name: node
-    #     static_configs:
-    #       - targets:
-    #         - columbia:9100
-    #         - jawa:9100
-    #         - india:9100
-    #         - tanzania:9100
     #     relabel_configs:
     #       - source_labels: [__address__]
     #         regex: '([^:]+):(\d+)'
