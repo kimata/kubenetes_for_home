@@ -60,8 +60,10 @@ spec:
         resources:
           requests:
             memory: 512Mi
+            ephemeral-storage: 32Mi
           limits:
             memory: 1Gi
+            ephemeral-storage: 64Mi
         livenessProbe:
           exec:
             command:
