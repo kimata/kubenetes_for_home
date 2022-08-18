@@ -1,0 +1,34 @@
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: monitor
+  labels:
+    name: monitor
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: node-exporter
+  namespace: monitor
+  labels:
+    name: node-exporter
+spec:
+  selector:
+    matchLabels:
+      name: node-exporter
+  template:
+    metadata:
+      labels:
+        name: node-exporter
+    spec:
+      tolerations:
+        - key: node-role.kubernetes.io/master
+          effect: NoSchedule
+      containers:
+        - name: node-exporter
+          image: prom/node-exporter:v1.3.1
+          ports:
+            - name: http
+              containerPort: 9100
+              protocol: TCP
+      hostNetwork: true

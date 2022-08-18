@@ -1,0 +1,196 @@
+# NOTE:
+# ホスト名 database のサーバー上に /data/prometheus ディレクトリがあることを想定．
+# 今後，ストレージを切り離すことを想定して，hostPath ではなく，persistentVolumeClaim を使う．
+
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: all-reader
+rules:
+- apiGroups: [""]
+  resources:
+  - nodes
+  - nodes/proxy
+  - services
+  - endpoints
+  - pods
+  verbs: ["get", "list", "watch"]
+- apiGroups:
+  - extensions
+  resources:
+  - ingresses
+  verbs: ["get", "list", "watch"]
+- nonResourceURLs: ["/metrics"]
+  verbs: ["get"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: prometheus
+  namespace: server
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: prometheus
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: all-reader
+subjects:
+- kind: ServiceAccount
+  name: prometheus
+  namespace: server
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app: prometheus
+  name: prometheus-config
+  namespace: server
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval:     15s
+      evaluation_interval: 15s
+      external_labels:
+
+    alerting:
+
+    rule_files:
+
+    scrape_configs:
+    - job_name: kubernetes_node_exporter
+      kubernetes_sd_configs:
+      - role: node
+      relabel_configs:
+      - source_labels: [__address__]
+        action: replace
+        regex: (.*):10250
+        replacement: ${1}:9100
+        target_label: __address__
+    # scrape_configs:
+    #   - job_name: 'prometheus'
+    #     scrape_interval: 5s
+    #     scrape_timeout: 5s
+    #     static_configs:
+    #       - targets: ['localhost:9090']
+    #   - job_name: node
+    #     static_configs:
+    #       - targets:
+    #         - columbia:9100
+    #         - jawa:9100
+    #         - india:9100
+    #         - tanzania:9100
+    #     relabel_configs:
+    #       - source_labels: [__address__]
+    #         regex: '([^:]+):(\d+)'
+    #         target_label: instance
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: prometheus
+  namespace: server
+  annotations:
+    metallb.universe.tf/address-pool: default
+spec:
+  selector:
+    app: prometheus
+  ports:
+  - port: 9090
+    targetPort: 9090
+  type: LoadBalancer
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: pv-prometheus
+  namespace: server
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 16Gi
+  accessModes:
+  - ReadWriteOnce
+  local:
+    path: /data/prometheus
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - database
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-prometheus
+  namespace: server
+spec:
+  storageClassName: manual
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 16Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+  namespace: server
+  labels:
+    app: prometheus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+    spec:
+      serviceAccount: prometheus
+      containers:
+      - name: prometheus
+        image: prom/prometheus:v2.38.0
+        args:
+        - '--config.file=/etc/prometheus/prometheus.yml'
+        - '--storage.tsdb.path=/prometheus'
+        - '--storage.tsdb.retention.time=100d'
+        volumeMounts:
+        - name: config
+          mountPath: /etc/prometheus
+        - name: data
+          mountPath: /prometheus
+        ports:
+        - containerPort: 9090
+        resources:
+          requests:
+            memory: 16Mi
+          limits:
+            memory: 32Mi
+        livenessProbe:
+          httpGet:
+            port: 9090
+            path: /
+          initialDelaySeconds: 120
+          periodSeconds: 60
+          timeoutSeconds: 30
+          successThreshold: 1
+          failureThreshold: 3
+      volumes:
+      - name: config
+        configMap:
+          name: prometheus-config
+      - name: data
+        persistentVolumeClaim:
+          claimName: pvc-prometheus
+      dnsPolicy: Default
+      nodeSelector:
+        kubernetes.io/hostname: database
