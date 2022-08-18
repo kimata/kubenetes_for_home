@@ -149,9 +149,9 @@ spec:
       - name: prometheus
         image: prom/prometheus:v2.38.0
         args:
-        - '--config.file=/etc/prometheus/prometheus.yml'
-        - '--storage.tsdb.path=/prometheus'
-        - '--storage.tsdb.retention.time=100d'
+        - --config.file=/etc/prometheus/prometheus.yml
+        - --storage.tsdb.path=/prometheus
+        - --storage.tsdb.retention.time=100d
         volumeMounts:
         - name: config
           mountPath: /etc/prometheus
