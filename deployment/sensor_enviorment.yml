@@ -1,0 +1,53 @@
+kind: DaemonSet
+apiVersion: apps/v1
+metadata:
+  name: enviorment-deployment
+  namespace: sensor
+  labels:
+    app: enviorment
+spec:
+  selector:
+    matchLabels:
+      app: enviorment
+  template:
+    metadata:
+      labels:
+        app: enviorment
+    spec:
+      volumes:
+      - name: dev
+        hostPath:
+          path: /dev
+      containers:
+      - name: enviorment
+        image: registry.green-rabbit.net/library/sensor_env:latest
+        imagePullPolicy: Always
+        env:
+        - name: NODE_HOSTNAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        livenessProbe:
+          exec:
+            command:
+              - /opt/sensor_env/src/healthz.py
+          initialDelaySeconds: 120
+          periodSeconds: 60
+          timeoutSeconds: 1
+          successThreshold: 1
+          failureThreshold: 3
+        securityContext:
+          privileged: true
+        volumeMounts:
+          - mountPath: /dev
+            name: dev
+      dnsPolicy: Default
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                - key: node-role.kubernetes.io/sensor
+                  operator: In
+                  values:
+                  - room
