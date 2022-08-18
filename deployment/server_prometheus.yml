@@ -161,9 +161,9 @@ spec:
         - containerPort: 9090
         resources:
           requests:
-            memory: 16Mi
+            memory: 128Mi
           limits:
-            memory: 32Mi
+            memory: 256Mi
         livenessProbe:
           httpGet:
             port: 9090
