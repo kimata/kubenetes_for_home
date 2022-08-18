@@ -1,5 +1,6 @@
 # NOTE:
-# ホスト名 database のサーバー上に /data/influxdb ディレクトリがあることを想定
+# ホスト名 database のサーバー上に /data/influxdb ディレクトリがあることを想定．
+# 今後，ストレージを切り離すことを想定して，hostPath ではなく，persistentVolumeClaim を使う．
 
 kind: Service
 apiVersion: v1
