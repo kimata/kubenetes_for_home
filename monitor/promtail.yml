@@ -15,7 +15,7 @@ metadata:
 data:
   config.yml: |
     clients:
-      - url: http://log:3100/loki/api/v1/push
+      - url: http://proxy.green-rabbit.net:3100/loki/api/v1/push
         backoff_config:
           max_period: 10m
           max_retries: 100
