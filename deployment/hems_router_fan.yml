@@ -1,29 +1,22 @@
-kind: Namespace
-apiVersion: v1
-metadata:
-  name: hems
-  labels:
-    name: hems
----
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: hems-router-fan-deployment
+  name: router-fan-deployment
   namespace: hems
   labels:
-    app: hems-router-fan
+    app: router-fan
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: hems-router-fan
+      app: router-fan
   template:
     metadata:
       labels:
-        app: hems-router-fan
+        app: router-fan
     spec:
       containers:
-      - name: hems-router-fan
+      - name: router-fan
         image: registry.green-rabbit.net/library/hems_router_fan:latest
         imagePullPolicy: Always
         resources:
