@@ -39,8 +39,8 @@ spec:
         securityContext:
           privileged: true
         volumeMounts:
-          - mountPath: /dev
-            name: dev
+          - name: dev
+            mountPath: /dev
       dnsPolicy: Default
       affinity:
         nodeAffinity:
