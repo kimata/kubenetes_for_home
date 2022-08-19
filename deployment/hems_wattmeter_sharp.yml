@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wattmeter-sharp
+  namespace: hems
+  labels:
+    app: wattmeter-sharp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wattmeter-sharp
+  template:
+    metadata:
+      labels:
+        app: wattmeter-sharp
+    spec:
+      volumes:
+      - name: dev
+        hostPath:
+          path: /dev
+      containers:
+      - name: wattmeter-sharp
+        image: registry.green-rabbit.net/library/jh-ag01_sniffer:latest
+        imagePullPolicy: Always
+        env:
+        livenessProbe:
+          exec:
+            command:
+              - /opt/jh-ag01_sniffer/src/healthz.py
+          initialDelaySeconds: 120
+          periodSeconds: 60
+          timeoutSeconds: 1
+          successThreshold: 1
+          failureThreshold: 3
+        securityContext:
+          privileged: true
+        volumeMounts:
+          - mountPath: /dev
+            name: dev
+      dnsPolicy: Default
+      nodeSelector:
+        kubernetes.io/hostname: hems
