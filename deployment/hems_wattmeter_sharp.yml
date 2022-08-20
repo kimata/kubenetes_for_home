@@ -21,13 +21,13 @@ spec:
           path: /dev
       containers:
       - name: wattmeter-sharp
-        image: registry.green-rabbit.net/library/jh-ag01_sniffer:latest
+        image: registry.green-rabbit.net/library/wattmeter_sharp:latest
         imagePullPolicy: Always
         env:
         livenessProbe:
           exec:
             command:
-              - /opt/jh-ag01_sniffer/src/healthz.py
+              - /opt/wattmeter_sharp/src/healthz.py
           initialDelaySeconds: 120
           periodSeconds: 60
           timeoutSeconds: 1
