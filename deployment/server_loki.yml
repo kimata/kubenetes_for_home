@@ -1,0 +1,155 @@
+# NOTE:
+# ホスト名 database のサーバー上に /data/prometheus ディレクトリがあることを想定．
+# 今後，ストレージを切り離すことを想定して，hostPath ではなく，persistentVolumeClaim を使う．
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app: loki
+  name: loki-config
+  namespace: server
+data:
+  config.yml: |
+    auth_enabled: false
+    
+    server:
+      http_listen_port: 3100
+      grpc_listen_port: 9096
+    
+    common:
+      path_prefix: /loki
+      storage:
+        filesystem:
+          chunks_directory: /loki/chunks
+          rules_directory: /loki/rules
+      replication_factor: 1
+      ring:
+        instance_addr: 127.0.0.1
+        kvstore:
+          store: inmemory
+    
+    schema_config:
+      configs:
+        - from: 2020-10-24
+          store: boltdb-shipper
+          object_store: filesystem
+          schema: v11
+          index:
+            prefix: index_
+            period: 24h
+    ruler:
+      alertmanager_url: http://localhost:9093
+    query_range:
+      parallelise_shardable_queries: false
+    
+    frontend:
+      max_outstanding_per_tenant: 4096
+      compress_responses: true
+      log_queries_longer_than: 10s
+    
+    analytics:
+      reporting_enabled: false
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: loki
+  namespace: server
+  annotations:
+    metallb.universe.tf/address-pool: default
+spec:
+  selector:
+    app: loki
+  ports:
+  - port: 3100
+    targetPort: 3100
+  type: LoadBalancer
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: pv-loki
+  namespace: server
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 16Gi
+  accessModes:
+  - ReadWriteOnce
+  local:
+    path: /data/loki
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - database
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-loki
+  namespace: server
+spec:
+  storageClassName: manual
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 16Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: loki
+  namespace: server
+  labels:
+    app: loki
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: loki
+  template:
+    metadata:
+      labels:
+        app: loki
+    spec:
+      containers:
+      - name: loki
+        image: grafana/loki:2.6.1
+        args:
+        - -config.file=/etc/loki/config.yml
+        volumeMounts:
+        - name: config
+          mountPath: /etc/loki
+        - name: data
+          mountPath: /loki
+        ports:
+        - containerPort: 3100
+        resources:
+          requests:
+            memory: 32Mi
+          limits:
+            memory: 128Mi
+        livenessProbe:
+          httpGet:
+            port: 3100
+            path: /loki/api/v1/status/buildinfo
+          initialDelaySeconds: 120
+          periodSeconds: 60
+          successThreshold: 1
+          failureThreshold: 3
+      volumes:
+      - name: config
+        configMap:
+          name: loki-config
+      - name: data
+        persistentVolumeClaim:
+          claimName: pvc-loki
+      dnsPolicy: Default
+      nodeSelector:
+        kubernetes.io/hostname: database
