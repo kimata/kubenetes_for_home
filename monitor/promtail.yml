@@ -1,17 +1,10 @@
-kind: Namespace
-apiVersion: v1
-metadata:
-  name: log
-  labels:
-    name: log
----
 apiVersion: v1
 kind: ConfigMap
 metadata:
   labels:
     app: promtail
   name: promtail-config
-  namespace: log
+  namespace: monitor
 data:
   config.yml: |
     clients:
@@ -54,7 +47,7 @@ kind: DaemonSet
 apiVersion: apps/v1
 metadata:
   name: promtail
-  namespace: log
+  namespace: monitor
   labels:
     app: promtail
 spec:
