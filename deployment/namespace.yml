@@ -33,3 +33,10 @@ metadata:
   labels:
     name: server
 ---
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: monitor
+  labels:
+    name: monitor
+---
