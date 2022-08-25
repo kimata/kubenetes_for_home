@@ -18,7 +18,7 @@ spec:
         - key: kubernetes.io/hostname
           operator: In
           values:
-          - tanzania
+          - worker
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -70,4 +70,4 @@ spec:
               claimName: pvc-bot-mercari-inventory-control
           dnsPolicy: Default
           nodeSelector:
-            kubernetes.io/hostname: tanzania
+            kubernetes.io/hostname: worker

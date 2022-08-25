@@ -1,4 +1,5 @@
 kubectl label node tanzania node-role.kubernetes.io/server=large --overwrite
+kubectl label node worker node-role.kubernetes.io/server=large --overwrite
 
 kubectl label node rpi-cm4-sensor-1 node-role.kubernetes.io/sensor=room --overwrite
 kubectl annotate nodes rpi-cm4-sensor-1 location=洋室A --overwrite

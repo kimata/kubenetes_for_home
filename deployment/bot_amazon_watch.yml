@@ -10,7 +10,7 @@ spec:
   accessModes:
   - ReadWriteOnce
   local:
-    path: /home/kimata/prog/amazon_bot/data
+    path: /home/kimata/github/amazon_bot/data
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -18,7 +18,7 @@ spec:
         - key: kubernetes.io/hostname
           operator: In
           values:
-          - tanzania
+          - worker
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -79,4 +79,4 @@ spec:
           claimName: pvc-bot-amazon-watch
       dnsPolicy: Default
       nodeSelector:
-        kubernetes.io/hostname: tanzania
+        kubernetes.io/hostname: worker
