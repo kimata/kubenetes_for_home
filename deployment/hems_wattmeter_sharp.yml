@@ -18,7 +18,7 @@ spec:
       volumes:
       - name: dev
         hostPath:
-          path: /dev
+          path: /dev/ttyUSB0
       containers:
       - name: wattmeter-sharp
         image: registry.green-rabbit.net/library/wattmeter_sharp:latest
@@ -36,7 +36,7 @@ spec:
         securityContext:
           privileged: true
         volumeMounts:
-          - mountPath: /dev
+          - mountPath: /dev/ttyUSB0
             name: dev
       dnsPolicy: Default
       nodeSelector:
