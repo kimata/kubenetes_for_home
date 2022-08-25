@@ -35,7 +35,7 @@ spec:
         livenessProbe:
           exec:
             command:
-              - /opt/weather_panel/src/healthz.py
+              - /opt/e-ink_weather/src/healthz.py
           initialDelaySeconds: 120
           periodSeconds: 60
           timeoutSeconds: 1

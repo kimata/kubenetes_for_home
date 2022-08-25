@@ -35,7 +35,7 @@ spec:
         livenessProbe:
           exec:
             command:
-              - /opt/sensor_panel/src/healthz.py
+              - /opt/kindle_sensor/src/healthz.py
           initialDelaySeconds: 120
           periodSeconds: 60
           timeoutSeconds: 1
