@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wattmeter-ups
+  namespace: hems
+  labels:
+    app: wattmeter-ups
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: wattmeter-ups
+  template:
+    metadata:
+      labels:
+        app: wattmeter-ups
+    spec:
+      containers:
+      - name: wattmeter-ups
+        image: registry.green-rabbit.net/library/wattmeter_ups:latest
+        imagePullPolicy: Always
+        env:
+        livenessProbe:
+          exec:
+            command:
+              - /opt/wattmeter_ups/src/healthz.py
+          initialDelaySeconds: 120
+          periodSeconds: 60
+          timeoutSeconds: 1
+          successThreshold: 1
+          failureThreshold: 3
+        securityContext:
+          privileged: true
+      dnsPolicy: Default
+      nodeSelector:
+        kubernetes.io/hostname: hems
