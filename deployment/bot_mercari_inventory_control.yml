@@ -36,7 +36,7 @@ spec:
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: mercari-inventory-control-deployment
+  name: mercari-inventory-control-cronjob
   namespace: bot
   labels:
     app: mercari-inventory-control
