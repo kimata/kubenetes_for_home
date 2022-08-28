@@ -1,0 +1,26 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mercari-inventory-control-job
+  namespace: bot
+  labels:
+    app: mercari-inventory-control
+spec:
+  backoffLimit: 1
+  template:
+    spec:
+      containers:
+        - name: mercari-inventory-control
+          image: registry.green-rabbit.net/library/bot_mercari_inventory_control:latest
+          imagePullPolicy: Always
+          volumeMounts:
+            - mountPath: /opt/mercari_bot/data
+              name: data
+      restartPolicy: Never
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: pvc-bot-mercari-inventory-control
+      dnsPolicy: Default
+      nodeSelector:
+        kubernetes.io/hostname: worker
