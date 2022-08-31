@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kindle-power-panel-deployment
+  namespace: panel
+  labels:
+    app: kindle-power-panel
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kindle-power-panel
+  template:
+    metadata:
+      labels:
+        app: kindle-power-panel
+    spec:
+      containers:
+      - name: kindle-power-panel
+        image: registry.green-rabbit.net/library/kindle_power_panel:latest
+        imagePullPolicy: Always
+        env:
+        - name: KINDLE_HOSTNAME
+          value: 192.168.0.100
+        - name: INFLUXDB_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: influxdb-token
+              key: password
+        resources:
+          requests:
+            memory: 128Mi
+          limits:
+            memory: 256Mi
+        livenessProbe:
+          exec:
+            command:
+              - /opt/kindle_power/src/healthz.py
+          initialDelaySeconds: 120
+          periodSeconds: 60
+          timeoutSeconds: 1
+          successThreshold: 1
+          failureThreshold: 3
+      dnsPolicy: Default
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: node-role.kubernetes.io/server
+                    operator: In
+                    values:
+                      - large
