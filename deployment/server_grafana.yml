@@ -15,6 +15,10 @@ data:
     protocol = http
     http_port = 3000
     domain = proxy.green-rabbit.net
+    [smtp]
+    enabled = true
+    host = mail-local.green-rabbit.net:25
+    skip_verify = true
 ---
 kind: Service
 apiVersion: v1
