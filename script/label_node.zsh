@@ -1,4 +1,8 @@
 kubectl label node tanzania node-role.kubernetes.io/server=large --overwrite
+kubectl label node tanzania node-role.kubernetes.io/storage=zfs --overwrite
+
+kubectl label node jawa node-role.kubernetes.io/storage=zfs --overwrite
+
 kubectl label node worker node-role.kubernetes.io/server=large --overwrite
 
 kubectl label node rpi-cm4-sensor-1 node-role.kubernetes.io/sensor=room --overwrite

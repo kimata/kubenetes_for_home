@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: zfs-exporter
+  namespace: monitor
+  labels:
+    name: zfs-exporter
+spec:
+  selector:
+    matchLabels:
+      name: zfs-exporter
+  template:
+    metadata:
+      labels:
+        name: zfs-exporter
+    spec:
+      containers:
+        - name: zfs-exporter
+          image: registry.green-rabbit.net/library/prometheus_zfs_exporter:latest
+          ports:
+            - name: http
+              containerPort: 9134
+              protocol: TCP
+          securityContext:
+            privileged: true
+      hostNetwork: true
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                - key: node-role.kubernetes.io/storage
+                  operator: In
+                  values:
+                    - zfs
+

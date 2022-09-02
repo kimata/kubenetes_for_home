@@ -24,4 +24,7 @@ spec:
             - name: http
               containerPort: 9100
               protocol: TCP
+          securityContext:
+            privileged: true
       hostNetwork: true
+      

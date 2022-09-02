@@ -61,7 +61,7 @@ data:
     rule_files:
 
     scrape_configs:
-    - job_name: kubernetes_node_exporter
+    - job_name: node_exporter
       scrape_interval: 5s
       scrape_timeout: 5s
       kubernetes_sd_configs:
@@ -71,6 +71,17 @@ data:
         action: replace
         regex: (.*):10250
         replacement: ${1}:9100
+        target_label: __address__
+    - job_name: zfs_exporter
+      scrape_interval: 5s
+      scrape_timeout: 5s
+      kubernetes_sd_configs:
+      - role: node
+      relabel_configs:
+      - source_labels: [__address__]
+        action: replace
+        regex: (.*):10250
+        replacement: ${1}:9134
         target_label: __address__
     #     relabel_configs:
     #       - source_labels: [__address__]
