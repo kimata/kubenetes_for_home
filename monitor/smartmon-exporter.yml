@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: smartmon-exporter
+  namespace: monitor
+  labels:
+    name: smartmon-exporter
+spec:
+  selector:
+    matchLabels:
+      name: smartmon-exporter
+  template:
+    metadata:
+      labels:
+        name: smartmon-exporter
+    spec:
+      containers:
+        - name: smartmon-exporter
+          image: registry.green-rabbit.net/library/prometheus_zfs_exporter:latest
+          volumeMounts:
+            - name: dev
+              mountPath: /dev
+          ports:
+            - name: http
+              containerPort: 9110
+              protocol: TCP
+          securityContext:
+            privileged: true
+      volumes:
+      - name: dev
+        hostPath:
+          path: /dev
+      hostNetwork: true
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                - key: node-role.kubernetes.io/storage
+                  operator: Exists
+
+

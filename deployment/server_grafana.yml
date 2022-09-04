@@ -19,6 +19,12 @@ data:
     enabled = true
     host = mail-local.green-rabbit.net:25
     skip_verify = true
+    [unified_alerting]
+    enabled = true
+    [unified_alerting.screenshots]
+    capture = true
+    max_concurrent_screenshots = 5
+    upload_external_image_storage = false
 ---
 kind: Service
 apiVersion: v1
@@ -92,13 +98,11 @@ spec:
         image: grafana/grafana-oss:9.0.2-ubuntu
         env:
         - name: GF_RENDERING_SERVER_URL
-          value: http://renderer:8081/render
+          value: http://grafana-renderer:8081/render
         - name: GF_RENDERING_CALLBACK_URL
           value: http://grafana:3000/
-        - name: GF_UNIFIED_ALERTING_ENABLED
-          value: "true"
-        - name: GF_UNIFIED_ALERTING_SCREENSHOTS_CAPTURE
-          value: "true"
+        - name: GF_LOG_FILTERS
+          value: rendering:debug
         volumeMounts:
         - name: config
           mountPath: /etc/grafana
@@ -120,12 +124,6 @@ spec:
           timeoutSeconds: 30
           successThreshold: 1
           failureThreshold: 3
-
-      - name: renderer
-        image: grafana/grafana-image-renderer:3.5.0
-        ports:
-        - containerPort: 8081
-        
       volumes:
       - name: config
         configMap:
@@ -133,6 +131,60 @@ spec:
       - name: data
         persistentVolumeClaim:
           claimName: pvc-grafana
-      dnsPolicy: Default
+      dnsPolicy: ClusterFirst
       nodeSelector:
         kubernetes.io/hostname: database
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: grafana-renderer
+  namespace: server
+spec:
+  selector:
+    app: grafana-renderer
+  ports:
+  - port: 8081
+    targetPort: 8081
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana-renderer
+  namespace: server
+  labels:
+    app: grafana-renderer
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: grafana-renderer
+  template:
+    metadata:
+      labels:
+        app: grafana-renderer
+    spec:
+      containers:
+      - name: grafana-renderer
+        image: grafana/grafana-image-renderer:3.5.0
+        ports:
+        - containerPort: 8081
+        resources:
+          requests:
+            memory: 128Mi
+          limits:
+            memory: 256Mi
+        livenessProbe:
+          httpGet:
+            port: 3000
+            path: /login
+          initialDelaySeconds: 120
+          periodSeconds: 60
+          timeoutSeconds: 30
+          successThreshold: 1
+          failureThreshold: 3
+      dnsPolicy: ClusterFirst
