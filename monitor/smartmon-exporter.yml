@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: smartmon-exporter
-          image: registry.green-rabbit.net/library/prometheus_zfs_exporter:latest
+          image: registry.green-rabbit.net/library/smartmon_exporter:latest
           volumeMounts:
             - name: dev
               mountPath: /dev
