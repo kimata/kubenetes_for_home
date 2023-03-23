@@ -1,0 +1,82 @@
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: pv-bot-price-watch
+  namespace: bot
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 1Gi
+  accessModes:
+  - ReadWriteOnce
+  local:
+    path: /home/kimata/github/price_watch/data
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - worker
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc-bot-price-watch
+  namespace: bot
+spec:
+  storageClassName: manual
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: price-watch-deployment
+  namespace: bot
+  labels:
+    app: price-watch
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: price-watch
+  template:
+    metadata:
+      labels:
+        app: price-watch
+    spec:
+      containers:
+      - name: price-watch
+        image: registry.green-rabbit.net/library/bot_price_watch:latest
+        imagePullPolicy: Always
+        volumeMounts:
+        - mountPath: /opt/price_watch/data
+          name: data
+        resources:
+          requests:
+            memory: 512Mi
+            ephemeral-storage: 32Mi
+          limits:
+            memory: 1Gi
+            ephemeral-storage: 64Mi
+        livenessProbe:
+          exec:
+            command:
+              - /opt/price_watch/src/healthz.py
+          initialDelaySeconds: 120
+          periodSeconds: 60
+          timeoutSeconds: 1
+          successThreshold: 1
+          failureThreshold: 3
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: pvc-bot-price-watch
+      dnsPolicy: Default
+      nodeSelector:
+        kubernetes.io/hostname: worker
