@@ -29,9 +29,11 @@ spec:
               key: password
         resources:
           requests:
-            memory: 128Mi
+            memory: 512Mi
+            ephemeral-storage: 32Mi
           limits:
-            memory: 256Mi
+            memory: 2Gi
+            ephemeral-storage: 64Mi
         livenessProbe:
           exec:
             command:
