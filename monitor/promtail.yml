@@ -93,3 +93,6 @@ spec:
               - matchExpressions:
                 - key: node-role.kubernetes.io/sensor
                   operator: Exists
+              - matchExpressions:
+                - key: node-role.kubernetes.io/hems
+                  operator: Exists
