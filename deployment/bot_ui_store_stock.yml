@@ -59,10 +59,10 @@ spec:
           name: data
         resources:
           requests:
-            memory: 320Mi
+            memory: 512Mi
             ephemeral-storage: 32Mi
           limits:
-            memory: 512Mi
+            memory: 2Gi
             ephemeral-storage: 64Mi
         livenessProbe:
           exec:
