@@ -103,11 +103,12 @@ data:
       static_configs:
       - targets:
         - mexico:9182
+      relabel_configs:
+      - source_labels: [__address__]
+        regex: '([^:]+):(\d+)'
+        target_label: instance
+        replacement: '${1}'
 
-    #     relabel_configs:
-    #       - source_labels: [__address__]
-    #         regex: '([^:]+):(\d+)'
-    #         target_label: instance
 ---
 kind: Service
 apiVersion: v1
