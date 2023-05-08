@@ -1,6 +1,6 @@
 # MEMO:
-# fetched from https://raw.githubusercontent.com/metallb/metallb/v0.13.4/config/manifests/metallb-native.yaml
-# date: 2020/8/15
+# fetched from https://raw.githubusercontent.com/metallb/metallb/v0.13.9/config/manifests/metallb-native.yaml
+# date: 2023/5/9
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -14,7 +14,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.7.0
+    controller-gen.kubebuilder.io/version: v0.11.1
   name: addresspools.metallb.io
 spec:
   conversion:
@@ -215,18 +215,12 @@ spec:
     storage: true
     subresources:
       status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.7.0
+    controller-gen.kubebuilder.io/version: v0.11.1
   creationTimestamp: null
   name: bfdprofiles.metallb.io
 spec:
@@ -238,7 +232,20 @@ spec:
     singular: bfdprofile
   scope: Namespaced
   versions:
-  - name: v1beta1
+  - additionalPrinterColumns:
+    - jsonPath: .spec.passiveMode
+      name: Passive Mode
+      type: boolean
+    - jsonPath: .spec.transmitInterval
+      name: Transmit Interval
+      type: integer
+    - jsonPath: .spec.receiveInterval
+      name: Receive Interval
+      type: integer
+    - jsonPath: .spec.detectMultiplier
+      name: Multiplier
+      type: integer
+    name: v1beta1
     schema:
       openAPIV3Schema:
         description: BFDProfile represents the settings of the bfd session that can
@@ -315,18 +322,12 @@ spec:
     storage: true
     subresources:
       status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.7.0
+    controller-gen.kubebuilder.io/version: v0.11.1
   creationTimestamp: null
   name: bgpadvertisements.metallb.io
 spec:
@@ -338,7 +339,21 @@ spec:
     singular: bgpadvertisement
   scope: Namespaced
   versions:
-  - name: v1beta1
+  - additionalPrinterColumns:
+    - jsonPath: .spec.ipAddressPools
+      name: IPAddressPools
+      type: string
+    - jsonPath: .spec.ipAddressPoolSelectors
+      name: IPAddressPool Selectors
+      type: string
+    - jsonPath: .spec.peers
+      name: Peers
+      type: string
+    - jsonPath: .spec.nodeSelectors
+      name: Node Selectors
+      priority: 10
+      type: string
+    name: v1beta1
     schema:
       openAPIV3Schema:
         description: BGPAdvertisement allows to advertise the IPs coming from the
@@ -432,6 +447,7 @@ spec:
                         are ANDed.
                       type: object
                   type: object
+                  x-kubernetes-map-type: atomic
                 type: array
               ipAddressPools:
                 description: The list of IPAddressPools to advertise via this advertisement,
@@ -496,6 +512,7 @@ spec:
                         are ANDed.
                       type: object
                   type: object
+                  x-kubernetes-map-type: atomic
                 type: array
               peers:
                 description: Peers limits the bgppeer to advertise the ips of the
@@ -513,18 +530,12 @@ spec:
     storage: true
     subresources:
       status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.7.0
+    controller-gen.kubebuilder.io/version: v0.11.1
   name: bgppeers.metallb.io
 spec:
   conversion:
@@ -547,7 +558,20 @@ spec:
     singular: bgppeer
   scope: Namespaced
   versions:
-  - name: v1beta1
+  - additionalPrinterColumns:
+    - jsonPath: .spec.peerAddress
+      name: Address
+      type: string
+    - jsonPath: .spec.peerASN
+      name: ASN
+      type: string
+    - jsonPath: .spec.bfdProfile
+      name: BFD Profile
+      type: string
+    - jsonPath: .spec.ebgpMultiHop
+      name: Multi Hops
+      type: string
+    name: v1beta1
     schema:
       openAPIV3Schema:
         description: BGPPeer is the Schema for the peers API.
@@ -650,7 +674,20 @@ spec:
     storage: false
     subresources:
       status: {}
-  - name: v1beta2
+  - additionalPrinterColumns:
+    - jsonPath: .spec.peerAddress
+      name: Address
+      type: string
+    - jsonPath: .spec.peerASN
+      name: ASN
+      type: string
+    - jsonPath: .spec.bfdProfile
+      name: BFD Profile
+      type: string
+    - jsonPath: .spec.ebgpMultiHop
+      name: Multi Hops
+      type: string
+    name: v1beta2
     schema:
       openAPIV3Schema:
         description: BGPPeer is the Schema for the peers API.
@@ -741,6 +778,7 @@ spec:
                         are ANDed.
                       type: object
                   type: object
+                  x-kubernetes-map-type: atomic
                 type: array
               password:
                 description: Authentication password for routers enforcing TCP MD5
@@ -761,6 +799,7 @@ spec:
                       name must be unique.
                     type: string
                 type: object
+                x-kubernetes-map-type: atomic
               peerASN:
                 description: AS number to expect from the remote end of the session.
                 format: int32
@@ -782,6 +821,10 @@ spec:
               sourceAddress:
                 description: Source address to use when establishing the session.
                 type: string
+              vrf:
+                description: To set if we want to peer with the BGPPeer using an interface
+                  belonging to a host vrf
+                type: string
             required:
             - myASN
             - peerASN
@@ -795,18 +838,12 @@ spec:
     storage: true
     subresources:
       status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.7.0
+    controller-gen.kubebuilder.io/version: v0.11.1
   creationTimestamp: null
   name: communities.metallb.io
 spec:
@@ -860,18 +897,12 @@ spec:
     storage: true
     subresources:
       status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.7.0
+    controller-gen.kubebuilder.io/version: v0.11.1
   creationTimestamp: null
   name: ipaddresspools.metallb.io
 spec:
@@ -883,7 +914,17 @@ spec:
     singular: ipaddresspool
   scope: Namespaced
   versions:
-  - name: v1beta1
+  - additionalPrinterColumns:
+    - jsonPath: .spec.autoAssign
+      name: Auto Assign
+      type: boolean
+    - jsonPath: .spec.avoidBuggyIPs
+      name: Avoid Buggy IPs
+      type: boolean
+    - jsonPath: .spec.addresses
+      name: Addresses
+      type: string
+    name: v1beta1
     schema:
       openAPIV3Schema:
         description: IPAddressPool represents a pool of IP addresses that can be allocated
@@ -922,6 +963,132 @@ spec:
                 description: AvoidBuggyIPs prevents addresses ending with .0 and .255
                   to be used by a pool.
                 type: boolean
+              serviceAllocation:
+                description: AllocateTo makes ip pool allocation to specific namespace
+                  and/or service. The controller will use the pool with lowest value
+                  of priority in case of multiple matches. A pool with no priority
+                  set will be used only if the pools with priority can't be used.
+                  If multiple matching IPAddressPools are available it will check
+                  for the availability of IPs sorting the matching IPAddressPools
+                  by priority, starting from the highest to the lowest. If multiple
+                  IPAddressPools have the same priority, choice will be random.
+                properties:
+                  namespaceSelectors:
+                    description: NamespaceSelectors list of label selectors to select
+                      namespace(s) for ip pool, an alternative to using namespace
+                      list.
+                    items:
+                      description: A label selector is a label query over a set of
+                        resources. The result of matchLabels and matchExpressions
+                        are ANDed. An empty label selector matches all objects. A
+                        null label selector matches no objects.
+                      properties:
+                        matchExpressions:
+                          description: matchExpressions is a list of label selector
+                            requirements. The requirements are ANDed.
+                          items:
+                            description: A label selector requirement is a selector
+                              that contains values, a key, and an operator that relates
+                              the key and values.
+                            properties:
+                              key:
+                                description: key is the label key that the selector
+                                  applies to.
+                                type: string
+                              operator:
+                                description: operator represents a key's relationship
+                                  to a set of values. Valid operators are In, NotIn,
+                                  Exists and DoesNotExist.
+                                type: string
+                              values:
+                                description: values is an array of string values.
+                                  If the operator is In or NotIn, the values array
+                                  must be non-empty. If the operator is Exists or
+                                  DoesNotExist, the values array must be empty. This
+                                  array is replaced during a strategic merge patch.
+                                items:
+                                  type: string
+                                type: array
+                            required:
+                            - key
+                            - operator
+                            type: object
+                          type: array
+                        matchLabels:
+                          additionalProperties:
+                            type: string
+                          description: matchLabels is a map of {key,value} pairs.
+                            A single {key,value} in the matchLabels map is equivalent
+                            to an element of matchExpressions, whose key field is
+                            "key", the operator is "In", and the values array contains
+                            only "value". The requirements are ANDed.
+                          type: object
+                      type: object
+                      x-kubernetes-map-type: atomic
+                    type: array
+                  namespaces:
+                    description: Namespaces list of namespace(s) on which ip pool
+                      can be attached.
+                    items:
+                      type: string
+                    type: array
+                  priority:
+                    description: Priority priority given for ip pool while ip allocation
+                      on a service.
+                    type: integer
+                  serviceSelectors:
+                    description: ServiceSelectors list of label selector to select
+                      service(s) for which ip pool can be used for ip allocation.
+                    items:
+                      description: A label selector is a label query over a set of
+                        resources. The result of matchLabels and matchExpressions
+                        are ANDed. An empty label selector matches all objects. A
+                        null label selector matches no objects.
+                      properties:
+                        matchExpressions:
+                          description: matchExpressions is a list of label selector
+                            requirements. The requirements are ANDed.
+                          items:
+                            description: A label selector requirement is a selector
+                              that contains values, a key, and an operator that relates
+                              the key and values.
+                            properties:
+                              key:
+                                description: key is the label key that the selector
+                                  applies to.
+                                type: string
+                              operator:
+                                description: operator represents a key's relationship
+                                  to a set of values. Valid operators are In, NotIn,
+                                  Exists and DoesNotExist.
+                                type: string
+                              values:
+                                description: values is an array of string values.
+                                  If the operator is In or NotIn, the values array
+                                  must be non-empty. If the operator is Exists or
+                                  DoesNotExist, the values array must be empty. This
+                                  array is replaced during a strategic merge patch.
+                                items:
+                                  type: string
+                                type: array
+                            required:
+                            - key
+                            - operator
+                            type: object
+                          type: array
+                        matchLabels:
+                          additionalProperties:
+                            type: string
+                          description: matchLabels is a map of {key,value} pairs.
+                            A single {key,value} in the matchLabels map is equivalent
+                            to an element of matchExpressions, whose key field is
+                            "key", the operator is "In", and the values array contains
+                            only "value". The requirements are ANDed.
+                          type: object
+                      type: object
+                      x-kubernetes-map-type: atomic
+                    type: array
+                type: object
             required:
             - addresses
             type: object
@@ -935,18 +1102,12 @@ spec:
     storage: true
     subresources:
       status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.7.0
+    controller-gen.kubebuilder.io/version: v0.11.1
   creationTimestamp: null
   name: l2advertisements.metallb.io
 spec:
@@ -958,7 +1119,21 @@ spec:
     singular: l2advertisement
   scope: Namespaced
   versions:
-  - name: v1beta1
+  - additionalPrinterColumns:
+    - jsonPath: .spec.ipAddressPools
+      name: IPAddressPools
+      type: string
+    - jsonPath: .spec.ipAddressPoolSelectors
+      name: IPAddressPool Selectors
+      type: string
+    - jsonPath: .spec.interfaces
+      name: Interfaces
+      type: string
+    - jsonPath: .spec.nodeSelectors
+      name: Node Selectors
+      priority: 10
+      type: string
+    name: v1beta1
     schema:
       openAPIV3Schema:
         description: L2Advertisement allows to advertise the LoadBalancer IPs provided
@@ -979,6 +1154,13 @@ spec:
           spec:
             description: L2AdvertisementSpec defines the desired state of L2Advertisement.
             properties:
+              interfaces:
+                description: A list of interfaces to announce from. The LB IP will
+                  be announced only from these interfaces. If the field is not set,
+                  we advertise from all the interfaces on the host.
+                items:
+                  type: string
+                type: array
               ipAddressPoolSelectors:
                 description: A selector for the IPAddressPools which would get advertised
                   via this advertisement. If no IPAddressPool is selected by this
@@ -1030,6 +1212,7 @@ spec:
                         are ANDed.
                       type: object
                   type: object
+                  x-kubernetes-map-type: atomic
                 type: array
               ipAddressPools:
                 description: The list of IPAddressPools to advertise via this advertisement,
@@ -1088,6 +1271,7 @@ spec:
                         are ANDed.
                       type: object
                   type: object
+                  x-kubernetes-map-type: atomic
                 type: array
             type: object
           status:
@@ -1098,12 +1282,6 @@ spec:
     storage: true
     subresources:
       status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -1120,85 +1298,6 @@ metadata:
     app: metallb
   name: speaker
   namespace: metallb-system
----
-apiVersion: policy/v1beta1
-kind: PodSecurityPolicy
-metadata:
-  labels:
-    app: metallb
-  name: controller
-spec:
-  allowPrivilegeEscalation: false
-  allowedCapabilities: []
-  allowedHostPaths: []
-  defaultAddCapabilities: []
-  defaultAllowPrivilegeEscalation: false
-  fsGroup:
-    ranges:
-    - max: 65535
-      min: 1
-    rule: MustRunAs
-  hostIPC: false
-  hostNetwork: false
-  hostPID: false
-  privileged: false
-  readOnlyRootFilesystem: true
-  requiredDropCapabilities:
-  - ALL
-  runAsUser:
-    ranges:
-    - max: 65535
-      min: 1
-    rule: MustRunAs
-  seLinux:
-    rule: RunAsAny
-  supplementalGroups:
-    ranges:
-    - max: 65535
-      min: 1
-    rule: MustRunAs
-  volumes:
-  - configMap
-  - secret
-  - emptyDir
----
-apiVersion: policy/v1beta1
-kind: PodSecurityPolicy
-metadata:
-  labels:
-    app: metallb
-  name: speaker
-spec:
-  allowPrivilegeEscalation: false
-  allowedCapabilities:
-  - NET_RAW
-  allowedHostPaths: []
-  defaultAddCapabilities: []
-  defaultAllowPrivilegeEscalation: false
-  fsGroup:
-    rule: RunAsAny
-  hostIPC: false
-  hostNetwork: true
-  hostPID: false
-  hostPorts:
-  - max: 7472
-    min: 7472
-  - max: 7946
-    min: 7946
-  privileged: true
-  readOnlyRootFilesystem: true
-  requiredDropCapabilities:
-  - ALL
-  runAsUser:
-    rule: RunAsAny
-  seLinux:
-    rule: RunAsAny
-  supplementalGroups:
-    rule: RunAsAny
-  volumes:
-  - configMap
-  - secret
-  - emptyDir
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -1382,6 +1481,7 @@ rules:
   - ""
   resources:
   - services
+  - namespaces
   verbs:
   - get
   - list
@@ -1409,9 +1509,39 @@ rules:
   - use
 - apiGroups:
   - admissionregistration.k8s.io
+  resourceNames:
+  - metallb-webhook-configuration
   resources:
   - validatingwebhookconfigurations
   - mutatingwebhookconfigurations
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - admissionregistration.k8s.io
+  resources:
+  - validatingwebhookconfigurations
+  - mutatingwebhookconfigurations
+  verbs:
+  - list
+  - watch
+- apiGroups:
+  - apiextensions.k8s.io
+  resourceNames:
+  - addresspools.metallb.io
+  - bfdprofiles.metallb.io
+  - bgpadvertisements.metallb.io
+  - bgppeers.metallb.io
+  - ipaddresspools.metallb.io
+  - l2advertisements.metallb.io
+  - communities.metallb.io
+  resources:
+  - customresourcedefinitions
   verbs:
   - create
   - delete
@@ -1425,12 +1555,7 @@ rules:
   resources:
   - customresourcedefinitions
   verbs:
-  - create
-  - delete
-  - get
   - list
-  - patch
-  - update
   - watch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -1446,6 +1571,7 @@ rules:
   - services
   - endpoints
   - nodes
+  - namespaces
   verbs:
   - get
   - list
@@ -1586,7 +1712,7 @@ spec:
           value: memberlist
         - name: METALLB_DEPLOYMENT
           value: controller
-        image: quay.io/metallb/controller:v0.13.4
+        image: quay.io/metallb/controller:v0.13.9
         livenessProbe:
           failureThreshold: 3
           httpGet:
@@ -1644,7 +1770,6 @@ spec:
                   operator: In
                   values:
                   - large
-
 ---
 apiVersion: apps/v1
 kind: DaemonSet
@@ -1687,12 +1812,9 @@ spec:
               fieldPath: status.podIP
         - name: METALLB_ML_LABELS
           value: app=metallb,component=speaker
-        - name: METALLB_ML_SECRET_KEY
-          valueFrom:
-            secretKeyRef:
-              key: secretkey
-              name: memberlist
-        image: quay.io/metallb/speaker:v0.13.4
+        - name: METALLB_ML_SECRET_KEY_PATH
+          value: /etc/ml_secret_key
+        image: quay.io/metallb/speaker:v0.13.9
         livenessProbe:
           failureThreshold: 3
           httpGet:
@@ -1728,6 +1850,10 @@ spec:
             drop:
             - ALL
           readOnlyRootFilesystem: true
+        volumeMounts:
+        - mountPath: /etc/ml_secret_key
+          name: memberlist
+          readOnly: true
       hostNetwork: true
       nodeSelector:
         kubernetes.io/os: linux
@@ -1740,6 +1866,11 @@ spec:
       - effect: NoSchedule
         key: node-role.kubernetes.io/control-plane
         operator: Exists
+      volumes:
+      - name: memberlist
+        secret:
+          defaultMode: 420
+          secretName: memberlist
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -1811,6 +1942,7 @@ webhooks:
     apiVersions:
     - v1beta1
     operations:
+    - CREATE
     - DELETE
     resources:
     - bfdprofiles
