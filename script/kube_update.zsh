@@ -3,6 +3,10 @@
 run() {
     echo "\e[0;36mrunning \e[1;37m\`$@'\e[0m"
     $@
+    if [ $? -ne 0 ]; then
+        echo "\e[1;31mAborting due to an error.\e[0m"
+        exit
+    fi
     echo
 }
 
