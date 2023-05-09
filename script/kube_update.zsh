@@ -14,7 +14,7 @@ run sudo curl -so /usr/share/keyrings/kubernetes-archive-keyring.gpg https://pac
 run sudo apt update -qq
 
 echo -e "\e[0;32mインストールするバージョンを選択してください．\e[0m"
-select ver in $(apt-cache madison kubeadm | head -n 4 | cut -d '|' -f 2 | xargs)
+select ver in $(apt-cache madison kubeadm | head -n 8 | cut -d '|' -f 2 | xargs)
 do
     break
 done
