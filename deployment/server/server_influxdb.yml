@@ -9,6 +9,7 @@ metadata:
   namespace: server
   annotations:
     metallb.universe.tf/address-pool: default
+    external-dns.alpha.kubernetes.io/hostname: influxdb.kubernetes.green-rabbit.net
 spec:
   selector:
     app: influxdb
