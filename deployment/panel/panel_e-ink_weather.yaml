@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: e-ink-weather-panel
-        image: registry.green-rabbit.net/library/e-ink_weather_panel:latest
+        image: registry.green-rabbit.net:5000/kimata/e-ink_weather_panel:latest
         imagePullPolicy: Always
         env:
         - name: RASP_HOSTNAME
