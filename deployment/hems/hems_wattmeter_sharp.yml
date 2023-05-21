@@ -23,7 +23,8 @@ spec:
           path: /dev/ttyUSB0
       containers:
       - name: wattmeter-sharp
-        image: registry.green-rabbit.net/library/wattmeter_sharp:latest
+        image: registry.green-rabbit.net:5000/kimata/wattmeter_sharp:latest
+        
         imagePullPolicy: Always
         env:
         livenessProbe:
