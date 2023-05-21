@@ -1,27 +1,43 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: m5paper-aqua-panel
+  namespace: panel
+  annotations:
+    metallb.universe.tf/address-pool: default
+    external-dns.alpha.kubernetes.io/hostname: m5paper-aqua.kubernetes.green-rabbit.net
+spec:
+  selector:
+    app: m5paper-aqua-panel
+  ports:
+  - port: 5555
+    targetPort: 5555
+  type: LoadBalancer
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: kindle-sensor-panel-deployment
+  name: m5paper-aqua-panel-deployment
   namespace: panel
   labels:
-    app: kindle-sensor-panel
+    app: m5paper-aqua-panel
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: kindle-sensor-panel
+      app: m5paper-aqua-panel
   template:
     metadata:
       labels:
-        app: kindle-sensor-panel
+        app: m5paper-aqua-panel
     spec:
       containers:
-      - name: kindle-sensor-panel
-        image: registry.green-rabbit.net/library/kindle_sensor_panel:latest
+      - name: m5paper-aqua-panel
+        image: registry.green-rabbit.net/library/m5paper_aqua_panel:latest
         imagePullPolicy: Always
+        ports:
+        - containerPort: 5555
         env:
-        - name: KINDLE_HOSTNAME
-          value: 192.168.0.101
         - name: INFLUXDB_TOKEN
           valueFrom:
             secretKeyRef:
@@ -29,18 +45,24 @@ spec:
               key: password
         resources:
           requests:
-            memory: 128Mi
-          limits:
             memory: 256Mi
+          limits:
+            memory: 512Mi
+            
         livenessProbe:
           exec:
             command:
-              - /opt/kindle_sensor/src/healthz.py
+              - /opt/aqua_panel/healthz.py
+          # httpGet:
+          #   port: 5555
+          #   path: /aqua-monitor/
           initialDelaySeconds: 120
-          periodSeconds: 60
-          timeoutSeconds: 1
+          periodSeconds: 120
+          timeoutSeconds: 30
           successThreshold: 1
           failureThreshold: 3
+
+          
       dnsPolicy: Default
       affinity:
         nodeAffinity:
@@ -51,4 +73,3 @@ spec:
                     operator: In
                     values:
                       - large
-
