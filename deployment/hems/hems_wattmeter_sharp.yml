@@ -1,32 +1,104 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: wattmeter-sharp-server
+  namespace: hems
+  annotations:
+    metallb.universe.tf/address-pool: default
+    external-dns.alpha.kubernetes.io/hostname: wattmeter-sharp-server.kubernetes.green-rabbit.net
+spec:
+  selector:
+    app: wattmeter-sharp-server
+  ports:
+  - port: 4444
+    targetPort: 4444
+  type: LoadBalancer
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: wattmeter-sharp
+  name: wattmeter-sharp-server-deployment
   namespace: hems
   labels:
-    app: wattmeter-sharp
+    app: wattmeter-sharp-server
 spec:
   replicas: 1
-  strategy:
-    type: Recreate
   selector:
     matchLabels:
-      app: wattmeter-sharp
+      app: wattmeter-sharp-server
   template:
     metadata:
       labels:
-        app: wattmeter-sharp
+        app: wattmeter-sharp-server
     spec:
       volumes:
       - name: dev
         hostPath:
           path: /dev/ttyUSB0
       containers:
+      - name: wattmeter-sharp-server
+        image: registry.green-rabbit.net:5000/kimata/wattmeter_sharp:latest
+        imagePullPolicy: Always
+        command: ["./app/sharp_hems_server.py"]
+
+        ports:
+        - containerPort: 4444
+
+        volumeMounts:
+          - mountPath: /dev/ttyUSB0
+            name: dev
+
+        securityContext:
+          privileged: true
+
+        resources:
+          requests:
+            memory: 256Mi
+          limits:
+            memory: 512Mi
+
+        livenessProbe:
+          exec:
+            command:
+              - /opt/wattmeter_sharp/src/healthz.py
+          initialDelaySeconds: 120
+          periodSeconds: 120
+          timeoutSeconds: 30
+          successThreshold: 1
+          failureThreshold: 3
+
+      dnsPolicy: Default
+      nodeSelector:
+        kubernetes.io/hostname: hems
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wattmeter-sharp-client
+  namespace: hems
+  labels:
+    app: wattmeter-sharp-client
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: wattmeter-sharp-client
+  template:
+    metadata:
+      labels:
+        app: wattmeter-sharp-client
+    spec:
+      volumes:
+      containers:
       - name: wattmeter-sharp
         image: registry.green-rabbit.net:5000/kimata/wattmeter_sharp:latest
-        
+
         imagePullPolicy: Always
         env:
+        - name: HEMS_SERVER_HOST
+          value: proxy.green-rabbit.net
         livenessProbe:
           exec:
             command:
@@ -36,11 +108,6 @@ spec:
           timeoutSeconds: 1
           successThreshold: 1
           failureThreshold: 3
-        securityContext:
-          privileged: true
-        volumeMounts:
-          - mountPath: /dev/ttyUSB0
-            name: dev
       dnsPolicy: Default
       nodeSelector:
         kubernetes.io/hostname: hems
