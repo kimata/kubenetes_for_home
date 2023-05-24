@@ -48,7 +48,7 @@ spec:
             memory: 256Mi
           limits:
             memory: 512Mi
-            
+
         livenessProbe:
           exec:
             command:
@@ -62,7 +62,7 @@ spec:
           successThreshold: 1
           failureThreshold: 3
 
-          
+
       dnsPolicy: Default
       affinity:
         nodeAffinity:

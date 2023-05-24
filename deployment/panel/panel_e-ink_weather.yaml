@@ -53,4 +53,60 @@ spec:
                     operator: In
                     values:
                       - large
-
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: e-ink-weather-small-panel-deployment
+  namespace: panel
+  labels:
+    app: e-ink-weather-small-panel
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: e-ink-weather-small-panel
+  template:
+    metadata:
+      labels:
+        app: e-ink-weather-small-panel
+    spec:
+      containers:
+      - name: e-ink-weather-small-panel
+        image: registry.green-rabbit.net:5000/kimata/e-ink_weather_panel:latest
+        command: ["./src/display_image.py", "-s", "-f", "config-small.yaml"]
+        imagePullPolicy: Always
+        env:
+        - name: RASP_HOSTNAME
+          value: rasp-display-2
+        - name: INFLUXDB_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: influxdb-token
+              key: password
+        resources:
+          requests:
+            memory: 512Mi
+            ephemeral-storage: 32Mi
+          limits:
+            memory: 2Gi
+            ephemeral-storage: 64Mi
+        livenessProbe:
+          exec:
+            command:
+              - /opt/e-ink_weather/src/healthz.py
+          initialDelaySeconds: 120
+          periodSeconds: 60
+          timeoutSeconds: 1
+          successThreshold: 1
+          failureThreshold: 5
+      dnsPolicy: Default
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: node-role.kubernetes.io/server
+                    operator: In
+                    values:
+                      - large
