@@ -17,7 +17,7 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: wattmeter-sharp-server-deployment
+  name: wattmeter-sharp-server
   namespace: hems
   labels:
     app: wattmeter-sharp-server
