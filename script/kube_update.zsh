@@ -22,7 +22,7 @@ done
 echo -ne "\e[0;32mバージョン \033[1;33m${ver} \033[0;32mに更新しますか？\e[0m"
 read -q "A? [y/N] "
 echo
-if [ $A != "y" ]; then 
+if [ $A != "y" ]; then
     echo "Stop.".
     exit
 fi
@@ -31,7 +31,5 @@ echo
 echo -e "バージョン \033[1;33m${ver} \033[0;37mへの更新を開始します．\e[0m"
 for name in kubeadm kubelet kubectl;
 do
-    run sudo apt-mark unhold -q $name
-    run sudo apt-get install -qq --allow-downgrades -y $name=$ver
-    run sudo apt-mark hold -q $name
- done
+    run sudo apt-get install -qq --allow-downgrades --allow-change-held-packages -y $name=$ver
+done
