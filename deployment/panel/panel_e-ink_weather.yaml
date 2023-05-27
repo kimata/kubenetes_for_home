@@ -74,7 +74,7 @@ spec:
       containers:
       - name: e-ink-weather-small-panel
         image: registry.green-rabbit.net:5000/kimata/e-ink_weather_panel:latest
-        command: ["./src/display_image.py", "-s", "-f", "config-small.yaml"]
+        command: ["./src/display_image.py", "-s", "-c", "config-small.yaml"]
         imagePullPolicy: Always
         env:
         - name: RASP_HOSTNAME

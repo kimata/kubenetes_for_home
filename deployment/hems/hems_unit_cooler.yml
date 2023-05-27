@@ -1,0 +1,102 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: unit-cooler-controller
+  namespace: hems
+  annotations:
+    metallb.universe.tf/address-pool: default
+    external-dns.alpha.kubernetes.io/hostname: unit-cooler-controller.kubernetes.green-rabbit.net
+spec:
+  selector:
+    app: unit-cooler-controller
+  ports:
+  - port: 2222
+    targetPort: 2222
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: unit-cooler-controller
+  namespace: hems
+  labels:
+    app: unit-cooler-controller
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: unit-cooler-controller
+  template:
+    metadata:
+      labels:
+        app: unit-cooler-controller
+    spec:
+      containers:
+      - name: unit-cooler-controller
+        image: registry.green-rabbit.net:5000/kimata/outdoor_unit_cooler:latest
+        imagePullPolicy: Always
+        command: ["./app/cooler_controller.py"]
+
+        ports:
+        - containerPort: 2222
+
+        resources:
+          requests:
+            memory: 256Mi
+          limits:
+            memory: 512Mi
+
+        livenessProbe:
+          exec:
+            command:
+              - /opt/unit_cooler/src/healthz.py
+          initialDelaySeconds: 120
+          periodSeconds: 120
+          timeoutSeconds: 30
+          successThreshold: 1
+          failureThreshold: 3
+
+      dnsPolicy: Default
+      nodeSelector:
+        kubernetes.io/hostname: hems
+---
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: wattmeter-sharp-client
+#   namespace: hems
+#   labels:
+#     app: wattmeter-sharp-client
+# spec:
+#   replicas: 1
+#   strategy:
+#     type: Recreate
+#   selector:
+#     matchLabels:
+#       app: wattmeter-sharp-client
+#   template:
+#     metadata:
+#       labels:
+#         app: wattmeter-sharp-client
+#     spec:
+#       volumes:
+#       containers:
+#       - name: wattmeter-sharp
+#         image: registry.green-rabbit.net:5000/kimata/wattmeter_sharp:latest
+
+#         imagePullPolicy: Always
+#         env:
+#         - name: HEMS_SERVER_HOST
+#           value: proxy.green-rabbit.net
+#         livenessProbe:
+#           exec:
+#             command:
+#               - /opt/wattmeter_sharp/src/healthz.py
+#           initialDelaySeconds: 120
+#           periodSeconds: 60
+#           timeoutSeconds: 1
+#           successThreshold: 1
+#           failureThreshold: 3
+#       dnsPolicy: Default
+#       nodeSelector:
+#         kubernetes.io/hostname: hems
